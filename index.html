@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Gacha cực mạnh</title>
+
+<style>
+html, body {height:100%; margin:0; font-family: Arial,sans-serif;}
+
+.bg {
+  min-height:100vh;
+  width:100%;
+  background-image:url("video/nền.png");
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:cover;
+  position:relative;
+}
+
+/* ===== BUTTON ROLL ===== */
+.gacha-btn {
+  position:absolute;
+  transform:translate(-50%,-50%);
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  width:490px;
+}
+
+.gacha-btn img.default { width:100%; display:block; }
+.gacha-btn img.active {
+  position:absolute; top:-30px; left:0;
+  width:500px; height:auto; display:none;
+}
+
+.gacha-btn:active img.default { display:none; }
+.gacha-btn:active img.active { display:block; }
+
+/* ===== VIDEO ===== */
+.gacha-video {
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  object-fit:cover;
+  display:none;
+  z-index:5;
+}
+
+/* ===== SKIP (ảnh) ===== */
+#skipBtn {
+  position:absolute;
+  z-index:20;
+  top:20px;
+  right:20px;
+  width:200px;
+  cursor:pointer;
+  display:none;
+}
+
+/* ===== HISTORY BUTTON ===== */
+#historyBtn {
+  position:absolute;
+  top:90.4%;
+  left:15.8%;
+  width:250px;
+  cursor:pointer;
+  z-index:20;
+}
+
+/* ===== PITY ===== */
+.pity-box {
+  position:absolute;
+  background:black;
+  color:yellow;
+  font-weight:bold;
+  padding:5px 15px;
+  border-radius:20px;
+  font-size:18px;
+  z-index:10;
+}
+
+#pityS { top:81%; left:88.6%; }
+#pityA { top:76%; left:88.6%; }
+
+/* ===== ROLL RESULT ===== */
+#rollResults img { object-fit:contain; }
+
+#rollResults {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  display: none;
+  z-index: 20;
+  cursor: pointer;
+  background-image: url("video/nenroll.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 18px;
+  width: 85vw;
+  max-width: 1300px;
+}
+
+.result-grid img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+/* ===== HISTORY POPUP ===== */
+#rollHistory {
+  display:none;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:80%;
+  max-width:800px;
+  max-height:80%;
+  background-color:rgba(0,0,0,0.95);
+  color:white;
+  padding:20px;
+  border-radius:15px;
+  overflow:auto;
+  z-index:30;
+}
+
+#rollHistory table {
+  width:100%;
+  border-collapse:collapse;
+  text-align:center;
+}
+
+#rollHistory th, #rollHistory td {
+  border-bottom:1px solid white;
+  padding:8px;
+}
+
+#rollHistory h2 {
+  text-align:center;
+  margin-bottom:20px;
+}
+
+#rollHistory button {
+  margin:10px 5px 0 5px;
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+#pagination {
+  text-align:center;
+  margin-top:10px;
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+
+  <!-- ROLL 1 -->
+  <button class="gacha-btn" style="left:57.5%; top:93.5%;" onclick="rollGacha()">
+    <img src="video/roll1.png" class="default">
+    <img src="video/roll 1 hover 2.1.png" class="active">
+  </button>
+
+  <!-- ROLL 10 -->
+  <button class="gacha-btn" style="left:84.5%; top:93.5%;" onclick="roll10()">
+    <img src="video/roll 10 hover.png" class="default">
+    <img src="video/roll 10 hover 2.png" class="active">
+  </button>
+
+  <div id="pityS" class="pity-box">90 Searches</div>
+  <div id="pityA" class="pity-box">10 Searches</div>
+
+  <!-- HISTORY BUTTON -->
+  <img id="historyBtn" src="video/history.png">
+</div>
+
+<!-- VIDEO -->
+<video id="video1" class="gacha-video" autoplay>
+  <source src="video/raa.mp4" type="video/mp4">
+</video>
+
+<video id="video2" class="gacha-video" autoplay>
+  <source src="video/ras.mp4" type="video/mp4">
+</video>
+
+<video id="videoSxin" class="gacha-video" autoplay>
+  <source src="video/vid_sxin.mp4" type="video/mp4">
+</video>
+
+<!-- SKIP (ảnh) -->
+<img id="skipBtn" src="video/skip.png">
+
+<!-- ROLL RESULTS -->
+<div id="rollResults"></div>
+
+<!-- HISTORY POPUP -->
+<div id="rollHistory">
+  <h2>Lịch Sử Roll</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Loại Tín Hiệu</th>
+        <th>Tín Hiệu</th>
+        <th>Loại Kênh</th>
+        <th>Thời Gian</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+  <div id="pagination">
+    <button id="prevPage">Trước</button>
+    <span id="pageInfo">1</span>
+    <button id="nextPage">Sau</button>
+  </div>
+  <button onclick="document.getElementById('rollHistory').style.display='none'">Đóng</button>
+</div>
+
+<script>
+let pityS=90, pityA=10, forceXIn=false, firstSTime=true;
+
+const rollResultsDiv=document.getElementById("rollResults");
+const skipBtn=document.getElementById("skipBtn");
+const historyBtn=document.getElementById("historyBtn");
+const rollHistoryDiv = document.getElementById("rollHistory");
+const historyBody = document.getElementById("historyBody");
+
+let currentPage = 1;
+const rowsPerPage = 5;
+
+// Lưu lịch sử roll vào localStorage
+let rollHistoryData = JSON.parse(localStorage.getItem("rollHistoryData") || "[]");
+
+function updatePityDisplay(){
+  document.getElementById("pityS").innerText = pityS + " Searches";
+  document.getElementById("pityA").innerText = pityA + " Searches";
+}
+
+function getSType(){
+  if(firstSTime){
+    firstSTime=false;
+    if(Math.random()<0.5){ forceXIn=true; return "S-cùi"; }
+    else{ forceXIn=false; return "S-xịn"; }
+  }
+  if(forceXIn){ forceXIn=false; return "S-xịn"; }
+  if(Math.random()<0.5){ forceXIn=true; return "S-cùi"; }
+  return "S-xịn";
+}
+
+function rollOnce(){
+  let result="", r=Math.random()*100;
+
+  if(pityS<=1){ result=getSType(); pityS=90; pityA--; }
+  else if(pityA<=1){ result="A"; pityA=10; pityS--; }
+  else{
+    if(r<0.6){ result=getSType(); pityS=90; pityA--; }
+    else if(r<9.4){ result="A"; pityA=10; pityS--; }
+    else{ result="B"; pityS--; pityA--; }
+  }
+
+  updatePityDisplay();
+  return result;
+}
+
+function getImageForResult(result){
+  if(result==="S-xịn") return "video/rasxin.png";
+  if(result==="S-cùi") return "video/rascui.png";
+  if(result==="A") return "video/raa1.png";
+  return "video/rab1.png";
+}
+
+// Lưu vào lịch sử
+function addToHistory(type, result){
+  const now = new Date();
+  const timeStr = now.getFullYear() + "-" +
+                  String(now.getMonth()+1).padStart(2,'0') + "-" +
+                  String(now.getDate()).padStart(2,'0') + " " +
+                  String(now.getHours()).padStart(2,'0') + ":" +
+                  String(now.getMinutes()).padStart(2,'0') + ":" +
+                  String(now.getSeconds()).padStart(2,'0');
+
+  const entry = {
+      type: type,
+      result: result,
+      channel: "Kênh Độc Quyền",
+      time: timeStr
+  };
+  rollHistoryData.unshift(entry);
+  localStorage.setItem("rollHistoryData", JSON.stringify(rollHistoryData));
+}
+
+// Cập nhật bảng lịch sử với phân trang
+function updateHistoryTable(){
+  historyBody.innerHTML="";
+  const start = (currentPage-1)*rowsPerPage;
+  const end = start + rowsPerPage;
+  const pageData = rollHistoryData.slice(start, end);
+
+  pageData.forEach(r=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = `<td>${r.type}</td><td>${r.result}</td><td>${r.channel}</td><td>${r.time}</td>`;
+      historyBody.appendChild(tr);
+  });
+
+  const totalPages = Math.ceil(rollHistoryData.length / rowsPerPage) || 1;
+  document.getElementById("pageInfo").innerText = currentPage + "/" + totalPages;
+}
+
+// Nút lịch sử
+historyBtn.onclick = () => {
+  rollHistoryData = JSON.parse(localStorage.getItem("rollHistoryData") || "[]");
+  currentPage = 1;
+  updateHistoryTable();
+  rollHistoryDiv.style.display="block";
+}
+
+// Phân trang
+document.getElementById("prevPage").onclick = () => {
+  if(currentPage > 1){ currentPage--; updateHistoryTable(); }
+}
+
+document.getElementById("nextPage").onclick = () => {
+  const totalPages = Math.ceil(rollHistoryData.length / rowsPerPage) || 1;
+  if(currentPage < totalPages){ currentPage++; updateHistoryTable(); }
+}
+
+// ========================
+// VIDEO & ROLL LOGIC
+// ========================
+function playVideo(type, resultsArray, callback){
+  const v1=document.getElementById("video1");
+  const v2=document.getElementById("video2");
+  const vs=document.getElementById("videoSxin");
+
+  const sCuiExtras = [
+    {src:"video/scui1.mp4", img:"video/rascui1.png", weight:20},
+    {src:"video/scui2.mp4", img:"video/rascui2.png", weight:15},
+    {src:"video/scui3.mp4", img:"video/rascui3.png", weight:10},
+    {src:"video/scui4.mp4", img:"video/rascui4.png", weight:25},
+    {src:"video/scui5.mp4", img:"video/rascui5.png", weight:20},
+    {src:"video/scui6.mp4", img:"video/rascui6.png", weight:10}
+  ];
+
+  function pickSCuiExtra(){
+    const r = Math.random()*100; let sum=0;
+    for(let v of sCuiExtras){ sum+=v.weight; if(r<=sum) return v; }
+    return sCuiExtras[sCuiExtras.length-1];
+  }
+
+  let chosenSCui = pickSCuiExtra();
+
+  resultsArray.forEach((r,i)=>{
+    if(r!=="S-xịn" && r!=="S-cùi") resultsArray[i]=getImageForResult(r);
+  });
+
+  [v1,v2,vs,...document.querySelectorAll(".extraVideo")].forEach(v=>{
+    v.style.display="none"; v.pause(); v.currentTime=0;
+    if(v.classList.contains("extraVideo")) v.remove();
+  });
+
+  document.getElementById("pityS").style.display="none";
+  document.getElementById("pityA").style.display="none";
+
+  // Ẩn nút lịch sử khi video phát
+  historyBtn.style.display = "none";
+
+  let mainVideo = (type==="S-xịn" || type==="S-cùi") ? v2 : v1;
+  mainVideo.style.display="block"; mainVideo.play();
+  skipBtn.style.display="block";
+
+  skipBtn.onclick = ()=>{
+    [v1,v2,vs,...document.querySelectorAll(".extraVideo")].forEach(v=>{
+      v.pause(); v.currentTime=9999; v.style.display="none";
+      if(v.classList.contains("extraVideo")) v.remove();
+    });
+    resultsArray.forEach((r,i)=>{
+      if(r==="S-xịn") resultsArray[i]="video/rasxin.png";
+      if(r==="S-cùi") resultsArray[i]=chosenSCui.img;
+    });
+    skipBtn.style.display="none";
+    document.getElementById("pityS").style.display="block";
+    document.getElementById("pityA").style.display="block";
+    historyBtn.style.display = "block"; // hiện lại nút lịch sử
+    displayResults(resultsArray, resultsArray.length>1);
+  }
+
+  mainVideo.onended = ()=>{
+    if(type==="S-xịn"){
+      vs.style.display="block"; vs.play();
+      vs.onended = ()=>{
+        resultsArray.forEach((r,i)=>{ if(r==="S-xịn") resultsArray[i]="video/rasxin.png"; });
+        finishAll();
+      };
+    } else if(type==="S-cùi"){
+      const extraVideo = document.createElement("video");
+      extraVideo.src = chosenSCui.src; extraVideo.className="gacha-video extraVideo";
+      extraVideo.style.cssText="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;";
+      extraVideo.autoplay = true;
+      document.body.appendChild(extraVideo);
+      extraVideo.onended = ()=>{
+        resultsArray.forEach((r,i)=>{ if(r==="S-cùi") resultsArray[i]=chosenSCui.img; });
+        extraVideo.remove(); finishAll();
+      }
+    } else finishAll();
+  }
+
+  function finishAll(){
+    skipBtn.style.display="none";
+    [v1,v2,vs,...document.querySelectorAll(".extraVideo")].forEach(v=>{ v.style.display="none"; if(v.classList.contains("extraVideo")) v.remove(); });
+    document.getElementById("pityS").style.display="block";
+    document.getElementById("pityA").style.display="block";
+    historyBtn.style.display = "block"; // hiện lại nút lịch sử
+    displayResults(resultsArray, resultsArray.length>1);
+    if(callback) callback();
+  }
+}
+
+
+function displayResults(results,isTen=false){
+  rollResultsDiv.innerHTML="";
+  if(!isTen){
+    const img=document.createElement("img");
+    img.src=results[0]; img.style.width="40%"; rollResultsDiv.appendChild(img);
+    rollResultsDiv.style.display="flex";
+    return;
+  }
+  const grid=document.createElement("div"); grid.className="result-grid";
+  results.forEach(r=>{ const img=document.createElement("img"); img.src=r; grid.appendChild(img); });
+  rollResultsDiv.appendChild(grid); rollResultsDiv.style.display="flex";
+}
+
+rollResultsDiv.addEventListener("click", ()=> rollResultsDiv.style.display="none");
+
+// ========================
+// ROLL FUNCTIONS
+// ========================
+function rollGacha(){
+  const r=rollOnce(); addToHistory("Agents", r);
+  const resultsArray=[r];
+  playVideo(r, resultsArray);
+}
+
+function roll10(){
+  let arr=[]; for(let i=0;i<10;i++) arr.push(rollOnce());
+  arr.forEach(r=>addToHistory("Agents", r));
+  const resultsArray=[...arr];
+  const type = arr.includes("S-xịn")?"S-xịn":arr.includes("S-cùi")?"S-cùi":"A";
+  playVideo(type, resultsArray);
+}
+</script>
+</body>
+</html>
